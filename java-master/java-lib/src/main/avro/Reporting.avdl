@@ -1,0 +1,55 @@
+@namespace("sunnylabs.report")
+protocol Reporting {
+
+  enum DataType {
+    DOUBLE, LONG, STRING, NUMERICAL
+  }
+
+  enum HistogramType {
+    TDIGEST, DOUBLE_TRUNCATE
+  }
+
+  record Histogram {
+    // Number of milliseconds that samples cover
+    int duration;
+    // Histogram is a list of sample bins and counts
+    HistogramType type;
+    array<double> bins;
+    array<int> counts;
+  }
+
+  record ReportPoint {
+    string metric;
+    // Milliseconds since 1970
+    long timestamp;
+    union { double, long, string, Histogram } value;
+    string host = "unknown";
+    string table = "tsdb";
+    map<string> annotations = {};
+  }
+
+  // The parts of a ReportPoint that uniquely identify a timeseries to wavefront.
+  record TimeSeries {
+    string metric;
+    string host = "unknown";
+    string table = "tsdb";
+    @java-class("java.util.TreeMap") map<string> annotations = {};
+  }
+
+  record IndexUpdate {
+    string table;
+    bytes metricKey;
+    bytes hostKey;
+    array<bytes> tagIds;
+    long timestamp;
+  }
+
+  @javaAnnotation("com.wavefront.data.Idempotent")
+  void reportPoint(ReportPoint point);
+  @javaAnnotation("com.wavefront.data.Idempotent")
+  void reportPoints(array<ReportPoint> points);
+  @javaAnnotation("com.wavefront.data.Idempotent")
+  void updateMetricHostTagsIndex(string table, bytes metricKey, bytes hostKey, array<bytes> tagIds, long timestamp);
+  @javaAnnotation("com.wavefront.data.Idempotent")
+  void updateMetricHostTagsIndices(array<IndexUpdate> indexUpdates);
+}
