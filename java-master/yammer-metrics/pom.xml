@@ -26,7 +26,7 @@
             <artifactId>java-lib</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
+            <groupId>com.google.gua</groupId>
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
